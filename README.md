@@ -2,15 +2,15 @@
 
 ## Group Name
 
-()
+Ok(Group)
 
 ## Group Members
 
 | Name | NetID |
 | --- | --- |
-| [Avery Weng] | [zweng9] |
-| [Ruotian Yang] | [alberty5] |
-| [Houlin Huang] | [houlinh2] |
+| Avery Weng | zweng9 |
+| Ruotian Yang | alberty5 |
+| Houlin Huang | houlinh2 |
 
 ## Project Introduction
 
@@ -55,23 +55,26 @@ Listens on a TCP port with `std::net::TcpListener` and spawns a thread for each 
 **`bin/client.rs`**
 Connects to the server, reads commands typed by the user, sends them over the connection, and prints the server's responses.
 
-### Checkpoints
+## Timeline
 
-**Checkpoint 1 (11/09 – 11/13)**
-- Implement the command parser with unit tests.
-- Implement the in-memory storage and its tests.
-- Build a local version of the server that reads commands from the terminal (no networking yet), so `SET`/`GET`/`DEL` can be tested end to end.
+### Checkpoint 1 (11/09 – 11/13)
 
-**Checkpoint 2 (11/30 – 12/04)**
-- Replace terminal input with a TCP server that handles one client.
-- Write the command-line client.
-- Add multithreading with `Arc<Mutex<...>>` so multiple clients can connect at once.
+* Define the `Command` enum and `Storage` trait (with room for TTL).
+* Implement the command parser (including the `EX` option) with unit tests.
+* Implement the in-memory store with tests.
+* Build a local terminal version so `SET`/`GET`/`DEL` work end to end.
 
-**Final Submission (12/07)**
-- Add key expiration and file persistence.
-- Make the server generic over the `Storage` trait with both backends.
-- Clean up code, pass `cargo clippy`, expand tests, and finish documentation.
-- If time allows: more data types (lists, sets), pub/sub, or compatibility with the real Redis protocol (RESP) so the official `redis-cli` can connect.
+### Checkpoint 2 (11/30 – 12/04)
+
+* TCP server and command-line client (single client first).
+* Multithreading with `Arc<Mutex<...>>` so many clients can share data; integration tests with multiple concurrent clients.
+* Key expiration (TTL).
+* File persistence as a second `Storage` implementation; make the server generic over the `Storage` trait.
+
+### Final Submission (12/07)
+
+* Clean up code, pass `cargo clippy`, expand tests, and finish documentation.
+* If time allows: background expiry cleanup, more data types, pub/sub, or RESP compatibility.
 
 ## Possible Challenges
 
@@ -80,7 +83,7 @@ Connects to the server, reads commands typed by the user, sends them over the co
 - The `Storage` trait needs to work for both in-memory and file-backed implementations.
 - Saving to disk without corrupting data and removing expired keys at the right time.
 - Writing reliable tests for behavior that involves multiple clients and connections.
-- Using branches and pull requests to avoid conflicts when we work in parrallel.
+- Using branches and pull requests to avoid conflicts when we work in parallel.
 
 ## References
 
