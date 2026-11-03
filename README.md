@@ -59,7 +59,7 @@ Connects to the server, reads commands typed by the user, sends them over the co
 
 ### Checkpoint 1 (11/09 – 11/13)
 
-* Define the `Command` enum and `Storage` trait (with room for TTL).
+* Define the `Command` enum and `Storage` struct (with room for TTL).
 * Implement the command parser (including the `EX` option) with unit tests.
 * Implement the in-memory store with tests.
 * Build a local terminal version so `SET`/`GET`/`DEL` work end to end.
