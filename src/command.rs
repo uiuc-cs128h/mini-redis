@@ -34,6 +34,21 @@ pub enum ParseError {
 }
 
 //implment display
+use std::fmt;
+impl fmt::Display for ParseError 
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result 
+    {
+        match self 
+        {
+            ParseError::EmptyCommand => write!(f,"empty command"),
+            ParseError::UnknownCommand(cmd) => write!(f,"unknown command '{cmd}'"),
+            ParseError::WrongArgs(cmd) => write!(f,"wrong number of arguments for '{cmd}'"),
+            ParseError::InvalidEx(t) => write!(f,"invalid expire time '{t}'"),
+            ParseError::SyntaxError => write!(f,"syntax error"),
+        }
+    }
+}
 
 pub fn parse_command(input: &str) -> Result<Command, ParseError> {
     let split: Vec<&str> = input.split_whitespace().collect();
