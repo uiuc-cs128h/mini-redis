@@ -1,6 +1,6 @@
 use std::io;
 use std::time::Duration;
-use mini_redis::command::{parse_command, Command};
+use mini_redis::command::{parse_command, Command, ParseError};
 use mini_redis::storage::Storage;
 
 fn main() 
