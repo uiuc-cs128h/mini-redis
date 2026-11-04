@@ -71,68 +71,84 @@ pub fn parse_command(input: &str) -> Result<Command, ParseError> {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    /*
-    match split.as_slice() {
-        [command, k] => {
-            match command.to_ascii_uppercase().as_str() {
-                "GET" => Ok(Command::Get{key: k.to_string()}),
-                "DEL" => Ok(Command::Del{key: k.to_string()}),
-                _ => Err(ParseError::InvalidArguments),
-            }
-        }
-        [command, k, v] => {
-            match command.to_ascii_uppercase().as_str() {
-                "SET" => Ok(Command::Set{key: k.to_string(), value: v.to_string(), ex: None}),
-                _ => Err(ParseError::InvalidArguments),
-            }
-        }
-        [command, k, v, command_ex, sec] => {
-            match command.to_ascii_uppercase().as_str() {
-                "SET"=> {
-                    if command_ex != 
-                }
-            }
-        }
-        _ => Err(ParseError::InvalidArguments),
+    #[test]
+    fn test_parse_set_basic() {
+        assert_eq!(
+            parse_command("SET name CS199"),
+            Ok(Command::Set {key: "name".to_string(), value: "CS199".to_string(), ex: None,})
+        );
+        assert_eq!(
+            parse_command("  set   key1   val1  \n"),
+            Ok(Command::Set {key: "key1".to_string(), value: "val1".to_string(), ex: None,})
+        );
     }
-    */
-    /*
-    let command: String = split[0].to_uppercase();
-    match command.as_str() {
-        "SET" => {
-            match split.len() {
-                3 => Ok(Command::Set{key: split[1].to_string(), value: split[2].to_string(), ex: None}),
-                5=>{
-                    if !split[3].eq_ignore_ascii_case("EX") {
-                        return Err(ParseError::InvalidArguments);
-                    }
-                    match split[4].parse::<u64>() {
-// Should 0 be allowed???
-                        Ok(number) if number > 0 => Ok(Command::Set{
-                            key: split[1].to_string(),
-                            value: split[2].to_string(),
-                            ex: Some(number),
-                        }),
-                        _ => Err(ParseError::InvalidArguments)
-                    }
-                }
-                _ => Err(ParseError::InvalidArguments),
-            }
-        }
-        "GET" => {
-            if split.len() != 2 {
-                return Err(ParseError::InvalidArguments);
-            }
-            Ok(Command::Get{key: split[1].to_string()})
-        }
-        "DEL" => {
-            if split.len() != 2 {
-                return Err(ParseError::InvalidArguments);
-            }
-            Ok(Command::Del{key: split[1].to_string()})
-        }
-        _ => Err(ParseError::UnknownCommand),
+
+    #[test]
+    fn test_parse_set_with_ex() {
+        assert_eq!(
+            parse_command("SET name CS199 EX 60"),
+            Ok(Command::Set {key: "name".to_string(), value: "CS199".to_string(), ex: Some(60),})
+        );
+        assert_eq!(
+            parse_command("SET name CS199 ex 10"),
+            Ok(Command::Set {key: "name".to_string(), value: "CS199".to_string(), ex: Some(10),})
+        );
+    }
+
+    #[test]
+    fn test_parse_get_and_del() {
+        assert_eq!(
+            parse_command("GET name"),
+            Ok(Command::Get {key: "name".to_string()})
+        );
+        assert_eq!(
+            parse_command("DEL name"),
+            Ok(Command::Del {key: "name".to_string()})
+        );
+    }
+
+    #[test]
+    fn test_parse_empty_and_unknown() {
+        assert_eq!(parse_command(""), Err(ParseError::EmptyCommand));
+        assert_eq!(parse_command("   "), Err(ParseError::EmptyCommand));
+        assert_eq!(
+            parse_command("PING"),
+            Err(ParseError::UnknownCommand("PING".to_string()))
+        );
+    }
+
+    #[test]
+    fn test_parse_wrong_args() {
+        assert_eq!(parse_command("SET"), Err(ParseError::WrongArgs("SET")));
+        assert_eq!(parse_command("SET k"), Err(ParseError::WrongArgs("SET")));
+        assert_eq!(parse_command("SET k v EX"), Err(ParseError::WrongArgs("SET")));
+        assert_eq!(parse_command("DEL"), Err(ParseError::WrongArgs("DEL")));
+        assert_eq!(parse_command("DEL k1 k2"), Err(ParseError::WrongArgs("DEL")));
+        assert_eq!(parse_command("GET"), Err(ParseError::WrongArgs("GET")));
+        assert_eq!(parse_command("GET k1 k2"), Err(ParseError::WrongArgs("GET")));  
+    }
+
+    #[test]
+    fn test_parse_syntax_and_invalid_ex() {
+        assert_eq!(
+            parse_command("SET k v PX 60"),
+            Err(ParseError::SyntaxError)
+        );
+        assert_eq!(
+            parse_command("SET k v EX 0"),
+            Err(ParseError::InvalidEx("0".to_string()))
+        );
+        assert_eq!(
+            parse_command("SET k v EX -114514"),
+            Err(ParseError::InvalidEx("-114514".to_string()))
+        );
+        assert_eq!(
+            parse_command("SET k v EX nowak"),
+            Err(ParseError::InvalidEx("nowak".to_string()))
+        );
     }
 }
-    */

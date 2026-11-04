@@ -58,3 +58,54 @@ let exist: bool = match self.data.get(k) {
         exist
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::thread;
+
+    #[test]
+    fn test_set_and_get() {
+        let mut store = Storage::new();
+        assert_eq!(store.get("name"), None);
+
+        store.set("name".to_string(), "CS199".to_string(), None);
+        assert_eq!(store.get("name"), Some("CS199".to_string()));
+    }
+
+    #[test]
+    fn test_overwrite_key() {
+        let mut store = Storage::new();
+        store.set("k".to_string(), "v1".to_string(), None);
+        store.set("k".to_string(), "v2".to_string(), None);
+        assert_eq!(store.get("k"), Some("v2".to_string()));
+    }
+
+    #[test]
+    fn test_del() {
+        let mut store = Storage::new();
+        store.set("k".to_string(), "v1".to_string(), None);
+        assert!(store.del("k"));
+        assert_eq!(store.get("k"), None);
+        assert!(!store.del("k"));
+    }
+
+    #[test]
+    fn test_expiration() {
+        let mut store = Storage::new();
+        store.set("temp".to_string(), "data".to_string(), Some(Duration::from_millis(50)),);
+        assert_eq!(store.get("temp"), Some("data".to_string()));
+        thread::sleep(Duration::from_millis(70));
+        assert_eq!(store.get("temp"), None);
+    }
+
+    #[test]
+    fn test_overwrite_clears_expiration() {
+        let mut store = Storage::new();
+        store.set("k".to_string(),"v1".to_string(), Some(Duration::from_millis(50)),);
+        store.set("k".to_string(), "v2".to_string(), None);
+
+        thread::sleep(Duration::from_millis(70));
+        assert_eq!(store.get("k"), Some("v2".to_string()));
+    }
+}
