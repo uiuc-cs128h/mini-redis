@@ -14,13 +14,13 @@ pub struct Storage {
 }
 
 impl Storage {
-pub fn new() -> Self {
-    Self {
-        data: HashMap::new(),
+    pub fn new() -> Self {
+        Self {
+            data: HashMap::new(),
+        }
     }
-}
-pub fn set(&mut self, k: String, v: String, d: Option<Duration>) {
-let entry =  Entry {
+    pub fn set(&mut self, k: String, v: String, d: Option<Duration>) {
+        let entry = Entry {
             value: v,
             expire_at: match d {
                 None => None,
@@ -29,15 +29,15 @@ let entry =  Entry {
         };
         self.data.insert(k, entry);
     }
-//lazy expiraton
-pub fn get(&mut self, k: &str) -> Option<String> {
-let expired = match self.data.get(k) {
+    //lazy expiraton
+    pub fn get(&mut self, k: &str) -> Option<String> {
+        let expired = match self.data.get(k) {
             None => false,
             Some(entry) => match entry.expire_at {
-//should instant == instant::now() count as expiration??
+                //should instant == instant::now() count as expiration??
                 Some(instant) if instant < Instant::now() => true,
                 _ => false,
-            }
+            },
         };
         if expired {
             self.data.remove(k);
@@ -47,14 +47,11 @@ let expired = match self.data.get(k) {
             Some(entry) => Some(entry.value.clone()),
         }
     }
-pub fn del(&mut self, k: &str) -> bool {
-let exist: bool = match self.data.get(k) {
-            None => false,
-            _ => true,
-        };
+    pub fn del(&mut self, k: &str) -> bool {
+        let exist = self.get(k).is_some(); // 用 Storage::get，会先清理过期的 key
         if exist {
             self.data.remove(k);
-        };
+        }
         exist
     }
 }
@@ -93,7 +90,11 @@ mod tests {
     #[test]
     fn test_expiration() {
         let mut store = Storage::new();
-        store.set("temp".to_string(), "data".to_string(), Some(Duration::from_millis(50)),);
+        store.set(
+            "temp".to_string(),
+            "data".to_string(),
+            Some(Duration::from_millis(50)),
+        );
         assert_eq!(store.get("temp"), Some("data".to_string()));
         thread::sleep(Duration::from_millis(70));
         assert_eq!(store.get("temp"), None);
@@ -102,7 +103,11 @@ mod tests {
     #[test]
     fn test_overwrite_clears_expiration() {
         let mut store = Storage::new();
-        store.set("k".to_string(),"v1".to_string(), Some(Duration::from_millis(50)),);
+        store.set(
+            "k".to_string(),
+            "v1".to_string(),
+            Some(Duration::from_millis(50)),
+        );
         store.set("k".to_string(), "v2".to_string(), None);
 
         thread::sleep(Duration::from_millis(70));
